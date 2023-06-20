@@ -5,7 +5,7 @@ import RegisterCMP from "../components/Register";
 const Register = () => {
     const register = (user: User) => registerUser(user);
     return (
-        <RegisterCMP onRegister={register}  amIAlive={amIAlive} />
+        <RegisterCMP onRegister={register} amIAlive={amIAlive} />
     )
 }
 export default Register;

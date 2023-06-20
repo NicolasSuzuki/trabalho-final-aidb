@@ -1,11 +1,14 @@
-import { Pets } from "../types";
-import RegisterCMP from "../components/PetRegister";
-import { registerPets } from "../api/pet";
+import { Navigation, Pets, PetsProps } from "../types";
+import RegisterCMP from "../components/Avatar";
+import { registerPet } from "../api/pet";
+import { View, Text } from "react-native";
 
-const Register = () => {
-    const register = (pet: Pets) => registerPets(pet);
+const Register = (navigation: Navigation) => {
+    const register = (pet: PetsProps) => registerPet(pet);
     return (
-        <RegisterCMP onRegister={register}  />
+        <View>
+            <Text>Registro</Text>
+        </View>
     )
 }
 export default Register;

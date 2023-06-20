@@ -1,4 +1,5 @@
 import axios from "axios";
+import { uri } from "../constants/imageUri";
 export const api = axios.create({
-    baseURL: "http://192.168.15.25:8080"
+    baseURL: uri
 })

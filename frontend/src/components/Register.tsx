@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 });
 
 const Register: React.FC<RegisterProps> = ({ onRegister, amIAlive }) => {
-  const [user, setUser] = useState<User>({ name: "", email: "" });
+  const [user, setUser] = useState<User>({ name: "", email: "", password: "", token: null });
   return (
     <SafeAreaView>
       <Text style={styles.container}>
@@ -48,6 +48,12 @@ const Register: React.FC<RegisterProps> = ({ onRegister, amIAlive }) => {
         style={styles.input}
         value={user.email}
         onChangeText={(value) => setUser({ ...user, email: value || "" })}
+      />
+      <TextInput
+        placeholder="Senha"
+        style={styles.input}
+        value={user.password}
+        onChangeText={(value) => setUser({ ...user, password: value || "" })}
       />
       <Button
         onPress={() => onRegister(user)}
