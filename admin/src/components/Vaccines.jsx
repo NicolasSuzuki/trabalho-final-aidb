@@ -72,10 +72,7 @@ const Vaccines = ({ onRegister, vaccines }) => {
           </TableHead>
           <TableBody>
             {vaccines &&
-              (emailFilter.length
-                ? vaccines.filter((c) => c.email.includes(emailFilter))
-                : vaccines
-              ).map((row) => (
+              vaccines.map((row) => (
                 <TableRow
                   key={row.name}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}

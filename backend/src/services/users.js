@@ -1,56 +1,140 @@
-const User = require("../models/User");
+const db = require("../models_elastic/db");
 const getToken = require("../utils/token");
 
 const userServices = {
-  getUserByToken: (token) => {
+  getUserByToken: async (token) => {
     if (!token) return null;
-    return User.findOne({
-      where: { token },
-    });
-  },
-  getUserById: (token) => {
-    if (!token) return null;
-    return User.findOne({
-      where: { token },
-    });
-  },
-  loginAdminUser: ({ email, password }) =>
-    User.findOne({
-      where: {
-        email,
-        password,
-        is_admin: 1,
-      },
-    }).then((user) => user.update({ token: getToken() })),
-  loginUser: ({ email, password }) =>
-    User.findOne({
-      where: {
-        email,
-        password,
-      },
-    }).then((user) => user.update({ token: getToken() })),
-  logoffUser: ({ token }) =>
-    User.findOne({
-      where: {
-        token,
-      },
-    }).then((user) => user.update({ token: null })),
-  createUser: (body) => {
-    return User.create(body)
-      .then((user) =>
-        ({
-          erro: false,
-          mensagem: "Usuario cadastrado com sucesso",
-          user
-        })
-      )
-      .catch(() =>
-        ({
-          erro: true,
-          mensagem: "Usuario nao cadastrado",
-        })
-      );
-  },
-};
 
+    const result = await db.search({
+      index: 'users',
+      body: {
+        query: {
+          term: { token }
+        }
+      }
+    });
+
+    const user = result.hits.hits.length > 0 ? {...result.hits.hits[0]._source, id: result.hits.hits[0]._id} : null;
+    return user
+  },
+  getUserById: async (id) => {
+    if (!id) return null;
+
+    const result = await db.get({
+      index: 'users',
+      id
+    });
+
+    return result.body._source;
+  },
+  loginAdminUser: async ({ email, password }) => {
+    const result = await db.search({
+      index: 'users',
+      body: {
+        query: {
+          bool: {
+            must: [
+              { match: { email } },
+              { match: { password } },
+              { term: { is_admin: true } }
+            ]
+          }
+        }
+      }
+    });
+
+    if (result.hits.hits.length > 0) {
+      const user = result.hits.hits[0];
+      const updatedUser = { ...user._source, token: getToken() };
+
+      await db.index({
+        index: 'users',
+        id: user._id,
+        body: updatedUser
+      });
+
+      return updatedUser;
+    }
+
+    return null;
+  },
+
+  loginUser: async ({ email, password }) => {
+    const result = await db.search({
+      index: 'users',
+      body: {
+        query: {
+          bool: {
+            must: [
+              { match: { email } },
+              { match: { password } }
+            ]
+          }
+        }
+      }
+    });
+
+    if (result.hits.hits.length > 0) {
+      const user = result.hits.hits[0];
+      const updatedUser = { ...user._source, token: getToken() };
+
+      await db.index({
+        index: 'users',
+        id: user._id,
+        body: updatedUser
+      });
+
+      return updatedUser;
+    }
+
+    return null;
+  },
+
+  logoffUser: async ({ token }) => {
+    const result = await db.search({
+      index: 'users',
+      body: {
+        query: {
+          term: { token }
+        }
+      }
+    });
+
+    if (result.hits.hits.length > 0) {
+      const user = result.hits.hits[0];
+      const updatedUser = { ...user._source, token: null };
+
+      await db.index({
+        index: 'users',
+        id: user._id,
+        body: updatedUser
+      });
+
+      return updatedUser;
+    }
+
+    return null;
+  },
+
+  createUser: async (body) => {
+    try {
+      const result = await db.index({
+        index: 'users',
+        id: getToken(),
+        body
+      });
+
+      return {
+        erro: false,
+        mensagem: "Usuário cadastrado com sucesso",
+        user: result.body
+      };
+    } catch (error) {
+      return {
+        erro: true,
+        mensagem: "Usuário não cadastrado",
+      };
+    }
+  }
+};
 module.exports = userServices;

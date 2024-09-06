@@ -1,7 +1,6 @@
 import { api } from "./api";
 
 export const registerPet = async (pet) => {
-  console.log(pet);
   return api.post("/pet/register", { ...pet }).then((resp) => resp.data);
 };
 
@@ -37,7 +36,6 @@ export const getAllVaccines = () => {
 
 //criar vaccines
 export const registerVaccine = async (vaccine) => {
-  console.log(vaccine);
   return api
     .post("/admin/vacina/create", { ...vaccine })
     .then((resp) => resp.data);
@@ -45,7 +43,6 @@ export const registerVaccine = async (vaccine) => {
 
 //criar vaccines
 export const addVaccineToPet = async ({ vaccineId, petId }) => {
-  console.log(vaccineId, petId);
   return api
     .post("/pet/vacina/create", { vaccineId, petId })
     .then((resp) => resp.data);
@@ -59,7 +56,6 @@ export const removeVaccineToPet = async ({ vaccineId, petId }) => {
 
 // Atualizar que o pet já foi vacinado
 export const updateVaccineToPet = async ({ vaccineId, petId, date }) => {
-  console.log(vaccineId, petId);
   return api
     .put("/pet/vacina/update/", {
       vaccineId,

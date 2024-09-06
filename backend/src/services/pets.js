@@ -1,5 +1,5 @@
-const db = require("../models/db");
-const Pet = require("../models/Pet");
+const db = require("../models_elastic/db");
+const Pet = require("../models_elastic/Pet");
 const { DateTime } = require("luxon");
 
 const getAppointments = (appointments) => {
@@ -12,21 +12,21 @@ const getAppointments = (appointments) => {
     };
   const now = DateTime.now();
   const nextAppointments = appointments.filter(
-    (appointment) => appointment.date.getTime() > now
+    (appointment) => DateTime.fromISO(appointment.date) > now
   );
   const history = appointments.filter(
-    (appointment) => appointment.date.getTime() < now
+    (appointment) => DateTime.fromISO(appointment.date) < now
   );
   const nextAppointment = nextAppointments.length
     ? nextAppointments.reduce((closest, appointment) => {
-        const closestTimeDiff = Math.abs(
-          DateTime.fromISO(closest.date.getTime()).minus(now)
-        );
-        const appointmentTimeDiff = Math.abs(
-          DateTime.fromISO(appointment.date.getTime()).minus(now)
-        );
-        return appointmentTimeDiff < closestTimeDiff ? appointment : closest;
-      })
+      const closestTimeDiff = Math.abs(
+        DateTime.fromISO(closest.date).minus(now)
+      );
+      const appointmentTimeDiff = Math.abs(
+        DateTime.fromISO(appointment.date).minus(now)
+      );
+      return appointmentTimeDiff < closestTimeDiff ? appointment : closest;
+    })
     : undefined;
   return {
     appointments,
@@ -39,10 +39,89 @@ const getAppointments = (appointments) => {
 };
 const petServices = {
   getAllPets: async () => {
-    const [pets, metadata] = await db.query(
-      "SELECT pets.*, i.data, u.name as `ownerName` FROM `pets` JOIN `users` as u on u.id = pets.userId LEFT JOIN `images` as i on i.id = pets.imageId"
-    );
-    return pets;
+    try {
+      const body = await db.search({
+        index: 'pets',
+        body: {
+          query: {
+            match_all: {}
+          },
+          _source: [
+            'userId',
+            'name',
+            'species',
+            'race',
+            'birthday',
+            'sex',
+            'color',
+            'imageId'
+          ]
+        }
+      });
+
+      const pets = body.hits.hits.map((hit) => ({
+        ...hit._source,
+        id: hit._id
+      })).filter(pet => pet.name);
+
+      // Assuming you have a separate index for users and images
+      const userIds = pets.map(pet => pet.userId);
+      const imageIds = pets.map(pet => pet.imageId);
+
+      let users = [];
+      if (userIds.length > 0) {
+        const userBody = await db.mget({
+          index: 'users',
+          body: {
+            ids: userIds.map(String)  // Ensure IDs are strings
+          }
+        });
+        users = userBody.docs.map(doc => ({ ...doc._source, id: doc._id }));
+      }
+
+      let images = [];
+      if (imageIds.length > 0) {
+        const imageBody = await db.mget({
+          index: 'images',
+          body: {
+            ids: imageIds.map(String)  // Ensure IDs are strings
+          }
+        });
+        images = imageBody.docs.map(doc => ({ ...doc._source, id: doc._id }));
+      }
+
+      const vaccines = await db.search({
+        index: 'vaccines',
+        body: {
+          query: {
+            match_all: {}
+          },
+        }
+      }).then(resps => resps.hits.hits.filter(item => item._source.name).map(item => ({ ...item._source, id: item._id })));
+
+      const petVaccines = await db.search({
+        index: 'pet-vaccine',
+        body: {
+          query: {
+            match_all: {}
+          },
+          _source: ['petId', 'vaccinatedAt', 'vaccineId']
+        }
+      }).then(resps => resps.hits.hits.filter(item => item._source.petId).map(item => ({ ...item._source, id: item._id })));
+
+      console.log(vaccines, petVaccines)
+      const result = pets.map(pet => ({
+        ...pet,
+        ownerName: users.find(user => user.id === pet.userId)?.name,
+        imageData: images.find(image => image.id === pet.imageId)?.data,
+        vaccines: petVaccines.filter(vaccine => vaccine.petId === pet.id).map(vaccine => ({ ...vaccine, name: vaccines.find(v => v.id === vaccine.vaccineId)?.name })),
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error fetching pets from Elasticsearch:', error);
+      return [];
+    }
   },
   getPetsByUserId: async ({ user, res }) => {
     const [pets, metadata] = await db.query(
@@ -78,14 +157,51 @@ const petServices = {
     return { results, appointments };
   },
   getPetsResults: async () => {
-    const [pets, metadata] = await db.query("SELECT pets.* FROM `pets`");
-    const [users, metadatas] = await db.query(
-      "SELECT id, name, email FROM `users`"
-    );
-    const [results, metasdatas] = await db.query(
-      "SELECT i.*, exams.* FROM `exams` LEFT JOIN `images` as i ON i.id = exams.imageId"
-    );
-    return { pets, users, results };
+    try {
+      // Consulta para obter todos os pets
+      const petsResponse = await db.search({
+        index: 'pets',
+        body: {
+          query: {
+            match_all: {}
+          }
+        }
+      });
+
+      const pets = petsResponse.hits.hits.map(hit => ({ ...hit._source, id: hit._id })).filter(item => !item.mappings);
+
+      // Consulta para obter todos os usuários
+      const usersResponse = await db.search({
+        index: 'users',
+        body: {
+          query: {
+            match_all: {}
+          }
+        }
+      });
+
+      const users = usersResponse.hits.hits.map(hit => ({ ...hit._source, id: hit._id })).filter(item => !item.mappings);
+
+      // Consulta para obter todos os exames, junto com suas imagens
+      const examsResponse = await db.search({
+        index: 'exams',
+        body: {
+          query: {
+            match_all: {}
+          },
+          _source: {
+            includes: ['*', 'images.*'] // Inclui todos os campos de exams e de images
+          }
+        }
+      });
+
+      const results = examsResponse.hits.hits.map(hit => ({ ...hit._source, id: hit._id })).filter(item => !item.mappings);
+
+      return { pets, users, results };
+    } catch (error) {
+      console.error("Erro ao buscar resultados no Elasticsearch:", error);
+      return { pets: [], users: [], results: [] };
+    }
   },
   getPetsAppointmentsByUserId: async ({ userId, pets }) => {
     const [appointments, metadata] = await db.query(
@@ -99,14 +215,43 @@ const petServices = {
     return petAppointments;
   },
   getPetsAppointments: async () => {
-    const [pets, metadata] = await db.query("SELECT pets.* FROM `pets`");
-    const [users, metadatas] = await db.query(
-      "SELECT id, name, email FROM `users`"
-    );
-    const [appointments, metasdatas] = await db.query(
-      "SELECT appointments.* FROM `appointments`"
-    );
+    // Fetch pets data from Elasticsearch
+    const petsResult = await db.search({
+      index: 'pets',
+      body: {
+        query: {
+          match_all: {}
+        }
+      }
+    });
+    const pets = petsResult.hits.hits.map(hit => ({ ...hit._source, id: hit._id })).filter(pet => pet.name);
+
+    // Fetch users data from Elasticsearch
+    const usersResult = await db.search({
+      index: 'users',
+      body: {
+        query: {
+          match_all: {}
+        }
+      }
+    });
+    const users = usersResult.hits.hits.map(hit => ({ ...hit._source, id: hit._id })).filter(user => user.email);
+
+    // Fetch appointments data from Elasticsearch
+    const appointmentsResult = await db.search({
+      index: 'appointments',
+      body: {
+        query: {
+          match_all: {}
+        }
+      }
+    });
+    const appointments = appointmentsResult.hits.hits.map(hit => hit._source).filter(appointment => appointment.petId);
+
+    // Process appointments information
     const appointmentsInfo = getAppointments(appointments);
+
+    // Return the combined data
     return { users, pets, ...appointmentsInfo };
   },
   getPetAppointmentsByPetId: async ({ pet }) => {
@@ -125,22 +270,28 @@ const petServices = {
     return vaccines;
   },
   createPet: async ({ pet }, res) => {
-    if (!pet.userId) pet["userId"] = user.dataValues.id;
-    if (pet.userId) pet["userId"] = parseInt(pet.userId, 10);
-    return Pet.create(pet)
-      .then((r) =>
-        res.json({
-          erro: false,
-          mensagem: "Pet cadastrado com sucesso",
-          data: r,
-        })
-      )
-      .catch(() =>
-        res.json({
-          erro: true,
-          mensagem: "Erro ao cadastrar pet",
-        })
-      );
+    try {
+      // Indexando o novo pet no Elasticsearch
+      const result = await db.index({
+        index: 'pets', // Nome do índice onde o documento será armazenado
+        body: pet      // O documento que será armazenado
+      });
+
+      // Respondendo com sucesso
+      res.json({
+        erro: false,
+        mensagem: "Pet cadastrado com sucesso",
+        data: result.body // O resultado da operação de indexação
+      });
+    } catch (error) {
+      // Tratamento de erro
+      console.error("Erro ao cadastrar pet no Elasticsearch:", error);
+      res.json({
+        erro: true,
+        mensagem: "Erro ao cadastrar pet",
+      });
+    }
+
   },
   updatePet: async ({ petId, imageId }, res) => {
     const pet = await Pet.findOne({ where: { id: petId } });

@@ -14,15 +14,10 @@ const Clients = () => {
   const [vaccines, setVaccines] = useState([]);
   const getAllData = () => {
     return getAllVaccines().then((r) => {
-      setVaccines(r[0]);
-      getAllPets().then((resul) => {
-        setPets(
-          resul.map((p) => ({
-            ...p,
-            vaccines: r[1].filter((v) => v.petId === p.id),
-          }))
-        );
-      });
+      console.log(r)
+      if(r.length > 0)
+        setVaccines(r);
+      getAllPets().then(setPets);
     });
   };
 

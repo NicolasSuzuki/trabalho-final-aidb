@@ -13,9 +13,7 @@ const Vaccines = () => {
     return resp;
   };
   useEffect(() => {
-    getAllVaccines().then((r) => {
-      setVaccines(r[0])
-    })
+    getAllVaccines().then(setVaccines)
     getAllUsers().then((r) => {
       const { users } = r;
       const u = users.map((us) => ({

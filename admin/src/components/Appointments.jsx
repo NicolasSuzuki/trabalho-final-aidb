@@ -35,11 +35,11 @@ const FormFields = ({ appointment, setAppointment, users, pets }) => (
           value={!!users && users.length && appointment.userId}
           placeholder="Selecione o cliente"
           onChange={(e) =>
-            setAppointment({ ...appointment, userId: e.target.value })
+            {console.log(e);setAppointment({ ...appointment, userId: e.target.value })}
           }
         >
           {!!users?.length &&
-            users.map((u) => <MenuItem value={u.id}>{u.name}</MenuItem>)}
+            users.map((u) => <MenuItem onClick={() => console.log(u)} value={u.id}>{u.name}</MenuItem>)}
         </Select>
       </FormControl>
     </Box>
@@ -148,6 +148,7 @@ const CreateAppointment = ({
   onRegister,
   setCreating,
 }) => {
+  console.log(users)
   return (
     <div style={{ display: "flex" }}>
       <FormFields

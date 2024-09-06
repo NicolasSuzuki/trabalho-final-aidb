@@ -55,7 +55,6 @@ export const updateResult = async (exam) =>
   api
     .put("/result/update", exam)
     .then((resp) => {
-      console.log(resp);
       return resp.data;
     })
     .catch((err) => {
@@ -63,11 +62,9 @@ export const updateResult = async (exam) =>
     });
 
 export const deleteResult = async ({ id }) => {
-  console.log(id);
   return api
     .delete(`/result/delete/${id}`)
     .then((resp) => {
-      console.log(resp);
       return resp.data;
     })
     .catch((err) => {
@@ -97,7 +94,6 @@ export const updateAppointment = async (appointment) =>
   api
     .put("/consulta/update", appointment)
     .then((resp) => {
-      console.log(resp);
       return resp.data;
     })
     .catch((err) => {
@@ -105,11 +101,9 @@ export const updateAppointment = async (appointment) =>
     });
 
 export const deleteAppointment = async ({ id }) => {
-  console.log(id);
   return api
     .put(`/consulta/cancel/${id}`)
     .then((resp) => {
-      console.log(resp);
       return resp.data;
     })
     .catch((err) => {

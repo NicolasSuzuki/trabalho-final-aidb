@@ -1,4 +1,4 @@
-const Exam = require("../models/Exam");
+const Exam = require("../models_elastic/Exam");
 // Exam and result are the same
 
 const examServices = {

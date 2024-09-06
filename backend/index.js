@@ -2,8 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 var http = require("http");
-const User = require("./src/models/User");
-const Image = require("./src/models/Image");
+const db = require("./src/models_elastic/db");
+const User = require("./src/models_elastic/User");
+const Image = require("./src/models_elastic/Image");
 const multer = require("multer");
 const Sequelize = require("sequelize");
 const usersServices = require("./src/services/users");
@@ -13,7 +14,7 @@ const petVaccineServices = require("./src/services/petVaccines");
 const examServices = require("./src/services/exam");
 const appointmentServices = require("./src/services/appointments");
 
-// Iniciliza multer
+// // Iniciliza multer
 const upload = multer({ dest: "uploads/" });
 const app = express();
 app.use(express.json());
@@ -26,11 +27,33 @@ app.use("/img/", express.static(__dirname + "/uploads"));
 app.get("/live", async (req, res) => res.json({ success: true }));
 app.get("/", async (req, res) => {
   if (req.headers.authorization) {
-    user = await User.findOne({ where: { token: req.headers.authorization } });
-    if (!user) return res.json({});
-    const { name, id, email } = user;
-    return res.json({ name, id, email });
+    try {
+      const result = await db.search({
+        index: 'users',
+        body: {
+          query: {
+            match: {
+              token: req.headers.authorization
+            }
+          }
+        }
+      });
+
+      if (result.hits.total.value === 0) {
+        return res.json({});
+      }
+
+      // Como `result.hits.hits` é uma lista de resultados, pegamos o primeiro
+      const user = result.hits.hits[0]._source;
+      const { name, email } = user;
+      return res.json({ name, id: result.hits.hits[0]._id, email });
+
+    } catch (error) {
+      console.error("Erro ao buscar usuário no Elasticsearch:", error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
+
   return res.json({});
 });
 
@@ -113,11 +136,13 @@ app.get("/consultas", async (req, res) => {
 
 app.get("/admin/consultas", async (req, res) => {
   if (req.headers.authorization) {
-    const user = await User.findOne({
-      where: { token: req.headers.authorization },
-    });
-    if (!user || !user.is_admin) return;
-    return res.json(await petServices.getPetsAppointments());
+    return usersServices
+      .getUserByToken(req.headers.authorization)
+      .then(async (user) => {
+        if (!user || !user.is_admin) return res.json([]);
+        const resp = await petServices.getPetsAppointments();
+        return res.json(resp)
+      })
   }
   return res.json([]);
 });
@@ -357,10 +382,8 @@ app.put("/consulta/update/", (req, res) => {
 
 // Atualizar o pet
 app.put("/pet/update/", (req, res) => {
-  console.log(req.body, req.headers)
   usersServices.getUserByToken(req.headers.authorization).then(async (user) => {
     if (!user) return;
-    console.log(user, req.body)
     return petServices.updatePet(
       {
         petId: req.body.petId,

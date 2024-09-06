@@ -32,7 +32,6 @@ const SimpleDialog = (props) => {
     } else if (msg === "add") {
       onAdd({ vaccineId, petId });
     } else if (msg === "update") {
-      console.log()
       if(date.toJSON()) onUpdate({vaccineId, petId, date: date.toJSON()});
     } else onClose(msg);
   };
@@ -148,7 +147,7 @@ const Pets = ({ onAdd, onRemove, onUpdate, pets, vaccines }) => {
   const handleClose = (value) => {
     setOpen(false);
   };
-
+  console.log(pets)
   return (
     <div>
       <TableContainer component={Paper}>
