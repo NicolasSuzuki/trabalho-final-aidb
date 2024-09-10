@@ -14,25 +14,35 @@ const Clients = () => {
   const [vaccines, setVaccines] = useState([]);
   const getAllData = () => {
     return getAllVaccines().then((r) => {
-      console.log(r)
-      if(r.length > 0)
+      if (r.length > 0)
         setVaccines(r);
       getAllPets().then(setPets);
     });
   };
 
+  const getVaccinePet = ({vac, petId}) => {
+    return {
+      vaccineId: vac.id,
+      petId,
+      vaccinatedAt: null,
+      id: vac.id,
+      name: vac.name
+    }
+  }
   const addPetVaccine = ({ vaccineId, petId }) => {
+    setPets(pets.map((p) => (p.id === petId ? ({ ...p, vaccines: [...p.vaccines, getVaccinePet({vac:vaccines.find((v) => v.id === vaccineId), petId})] }) : p)));
     addVaccineToPet({ vaccineId, petId }).then((r) => {
-      getAllData();
+    }).catch((e) => {
+      console.log(e)
+      setPets(pets.map((p) => (p.id === petId ? ({ ...p, vaccines: p.vaccines.filter((v) => v.id !== vaccineId) }) : p)));
     });
   };
   const removePetVaccine = ({ vaccineId, petId }) => {
     removeVaccineToPet({ vaccineId, petId }).then((r) => {
-      getAllData();
+      setPets(pets.map((p) => (p.id === petId ? ({ ...p, vaccines: p.vaccines.filter((v) => v.vaccineId === vaccineId) }) : p)));
     });
   };
   const updatePetVaccine = ({ vaccineId, petId, date }) => {
-    console.log(vaccineId, petId, date)
     updateVaccineToPet({ vaccineId, petId, date }).then((r) => {
       getAllData();
     });

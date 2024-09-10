@@ -26,15 +26,17 @@ const App = () => {
       <Router>
         <AppBar />
         <div style={{ marginTop: 70 }}>
-          <Routes>
-            <Route element={<Home />} path="/" exact />
-            <Route element={<Results />} path="/resultados" />
-            <Route element={<Clients />} path="/clientes" />
-            <Route element={<Vaccines />} path="/vacinas" />
-            <Route element={<Pets />} path="/pets" />
-            <Route element={<Appointments />} path="/consultas" />
-            <Route element={<RegisterPet />} path="/cliente/pet" />
-          </Routes>
+          <div style={{ maxWidth: 1400, margin: 'auto' }}>
+            <Routes>
+              <Route element={<Home />} path="/" exact />
+              <Route element={<Results />} path="/resultados" />
+              <Route element={<Clients />} path="/clientes" />
+              <Route element={<Vaccines />} path="/vacinas" />
+              <Route element={<Pets />} path="/pets" />
+              <Route element={<Appointments />} path="/consultas" />
+              <Route element={<RegisterPet />} path="/cliente/pet" />
+            </Routes>
+          </div>
         </div>
       </Router>
     );
@@ -43,7 +45,7 @@ const App = () => {
       <AppBar />
       <div style={{ marginTop: 70 }}>
         <Routes>
-          <Route element={<Home />} path="/" exact/>
+          <Route element={<Home />} path="/" exact />
         </Routes>
       </div>
     </Router>

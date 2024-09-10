@@ -1,6 +1,6 @@
 import { useEffect, useState, Fragment } from "react";
 
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -25,6 +25,12 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 
 const SimpleDialog = (props) => {
   const { onClose, open, vaccines, pet, onAdd, onRemove, onUpdate } = props;
+  const [vaccinesToAdd, setVaccinesToAdd] = useState(vaccines.filter(v => !pet.vaccines.find(pv => pv.vaccineId === v.id)));
+
+  useEffect(() => {
+    setVaccinesToAdd(vaccines.filter(v => !pet.vaccines.find(pv => pv.vaccineId === v.id)));
+    console.log(pet, 'ATUALIZADO')
+  }, [pet])
 
   const handleAction = ({ msg, vaccineId, petId, date }) => {
     if (msg === "remove") {
@@ -32,7 +38,7 @@ const SimpleDialog = (props) => {
     } else if (msg === "add") {
       onAdd({ vaccineId, petId });
     } else if (msg === "update") {
-      if(date.toJSON()) onUpdate({vaccineId, petId, date: date.toJSON()});
+      if (date.toJSON()) onUpdate({ vaccineId, petId, date: date.toJSON() });
     } else onClose(msg);
   };
 
@@ -44,38 +50,34 @@ const SimpleDialog = (props) => {
           {/* Espaço da esquerda: vacinas atribuídas ao pet */}
           <h3>Vacinas Atribuídas ao Pet</h3>
           <List sx={{ pt: 0 }}>
-            {pet.vaccines.sort((a,b) => a.vaccineId - b.vaccineId).map((vaccine) => (
+            {pet.vaccines.sort((a, b) => a.name - b.name).map((vaccine) => (
               <ListItem
                 disableGutters
                 key={`${vaccine.petId}_vaccine_of_pet_${vaccine.vaccineId}`}
               >
                 <ListItemButton>
                   <ListItemText primary={vaccine.name} />
-                  {true && (
-                    <>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DateTimePicker
-                          inputFormat="DD/MM/YYYY hh:mm"
-                          label="Quando foi vacinado?"
-                          value={vaccine.vaccinatedAt}
-                          onChange={(value) =>
-                            handleAction({
-                              msg: "update",
-                              date: value,
-                              vaccineId: vaccine.vaccineId,
-                              petId: pet.id,
-                            })
-                          }
-                          renderInput={(params) => (
-                            <TextField
-                              style={{ maxWidth: 280, marginRight: 15 }}
-                              {...params}
-                            />
-                          )}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DateTimePicker
+                      inputFormat="DD/MM/YYYY hh:mm"
+                      label="Quando foi vacinado?"
+                      value={vaccine.vaccinatedAt}
+                      onChange={(value) =>
+                        handleAction({
+                          msg: "update",
+                          date: value,
+                          vaccineId: vaccine.vaccineId,
+                          petId: pet.id,
+                        })
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          style={{ maxWidth: 280, marginRight: 15 }}
+                          {...params}
                         />
-                      </LocalizationProvider>
-                    </>
-                  )}
+                      )}
+                    />
+                  </LocalizationProvider>
                   <ListItemAvatar
                     onClick={() =>
                       handleAction({
@@ -99,12 +101,7 @@ const SimpleDialog = (props) => {
           {/* Espaço da direita: lista de vacinas */}
           <h3>Lista de Vacinas</h3>
           <List sx={{ pt: 0 }}>
-            {vaccines
-              .filter(
-                (v) =>
-                  pet.vaccines.find((pv) => pv.vaccineId === v.id)
-                    ?.vaccineId !== v.id
-              )
+            {vaccinesToAdd
               .map((vaccine) => (
                 <ListItem disableGutters key={`${vaccine.id}_vaccines`}>
                   <ListItemButton
@@ -185,7 +182,16 @@ const Pets = ({ onAdd, onRemove, onUpdate, pets, vaccines }) => {
                   </TableCell>
                   <TableCell align="right">
                     <Button
-                      variant="outlined"
+                      variant="contained"
+                      style={{
+                        borderRadius: 5,
+                        padding: "10px 25px",
+                        border: "1px solid #80c197",
+                        fontWeight: "bold",
+                        textDecoration: "none",
+                        backgroundColor: "white",
+                        color: "#80c197"
+                      }}
                       onClick={() => handleClickOpen(row.id)}
                     >
                       Editar vacina do pet

@@ -23,36 +23,58 @@ const Clients = ({ onRegister, clients }) => {
     return (
       <div>
         <Typography>Criando cliente</Typography>
-        <TextField
-          placeholder="Nome"
-          value={user.name}
-          onChange={(e) => setUser({ ...user, name: e.target.value || "" })}
-        />
-        <TextField
-          placeholder="Email"
-          value={user.email}
-          onChange={(e) => setUser({ ...user, email: e.target.value || "" })}
-        />
-        <TextField
-          placeholder="Senha"
-          value={user.password}
-          type="password"
-          onChange={(e) => setUser({ ...user, password: e.target.value || "" })}
-        />
-        <Button
-          onClick={() => {
-            onRegister(user);
-          }}
-        >
-          Criar
-        </Button>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <TextField
+            style={{ marginRight: 10, width: 250 }}
+            placeholder="Nome"
+            value={user.name}
+            onChange={(e) => setUser({ ...user, name: e.target.value || "" })}
+          />
+          <TextField
+            style={{ marginRight: 10, width: 250 }}
+            placeholder="Email"
+            value={user.email}
+            onChange={(e) => setUser({ ...user, email: e.target.value || "" })}
+          />
+          <TextField
+            style={{ marginRight: 10, width: 250 }}
+            placeholder="Senha"
+            value={user.password}
+            type="password"
+            onChange={(e) => setUser({ ...user, password: e.target.value || "" })}
+          />
+          <Button
+            style={{
+              borderRadius: 5,
+              padding: "10px 25px",
+              margin: "0 0 0 20px",
+              backgroundColor: "#80c197",
+              fontWeight: "bold",
+              color: "white",
+            }}
+            onClick={() => {
+              onRegister(user);
+            }}
+          >
+            Criar
+          </Button>
+        </div>
       </div>
     );
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       <Typography>Busque por email</Typography>
-      <TextField onChange={(e) => setFilter(e.target.value)}></TextField>
-      <Button onClick={() => setCreating(true)}>
+      <TextField style={{ width: 300 }} onChange={(e) => setFilter(e.target.value)}></TextField>
+      <Button
+        variant="contained"
+        style={{
+          borderRadius: 5,
+          padding: "10px 25px",
+          margin: "15px 0 15px auto",
+          backgroundColor: "#80c197",
+          fontWeight: "bold",
+        }}
+        onClick={() => setCreating(true)}>
         Criar usuário para cliente
       </Button>
       <TableContainer component={Paper}>
@@ -89,9 +111,21 @@ const Clients = ({ onRegister, clients }) => {
                       ))}
                   </TableCell>
                   <TableCell align="right">
-                    <Button onClick={() => console.log(row.id)}>
-                      <Link to={`/cliente/pet?clientId=${row.id}`}>
-                        Adicionar novo pet
+                    <Button
+                      variant="contained"
+                      style={{
+                        borderRadius: 5,
+                        padding: "10px 25px",
+                        border: "1px solid #80c197",
+                        fontWeight: "bold",
+                        textDecoration: "none",
+                        backgroundColor: "white",
+                      }}
+                      onClick={() => console.log(row.id)}>
+                      <Link
+                        style={{ textDecoration: "none", color: "#80c197" }}
+                        to={`/cliente/pet?clientId=${row.id}`}>
+                        Adicionar pet
                       </Link>
                     </Button>
                   </TableCell>

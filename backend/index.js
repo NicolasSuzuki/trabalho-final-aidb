@@ -333,6 +333,7 @@ app.post("/consulta/create", (req, res) => {
       {
         date: req.body.date,
         petId: req.body.petId,
+        description: req.body.description,
       },
       res
     );

@@ -23,11 +23,9 @@ const Vaccines = ({ onRegister, vaccines }) => {
     setFilter("");
   }, [vaccines]);
   return (
-    <div>
-      <>
-        <div>
-          <Typography>Crie uma vacina</Typography>
-        </div>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <Typography>Crie uma vacina</Typography>
+      <div style={{ display: "flex", flexDirection: "row" }}>
         <TextField
           placeholder="Nome da vacina"
           value={vaccine.name}
@@ -54,19 +52,27 @@ const Vaccines = ({ onRegister, vaccines }) => {
           </Select>
         </FormControl>
         <Button
+          style={{
+            borderRadius: 5,
+            padding: "10px 25px",
+            marginLeft: "15px",
+            backgroundColor: "#80c197",
+            fontWeight: "bold",
+            color: "white",
+          }}
           onClick={() => {
             onRegister(vaccine).then((r) => setVaccine(defaultVaccine));
           }}
         >
           Criar
         </Button>
-      </>
-      <TableContainer style={{ maxWidth: 650 }} component={Paper}>
+      </div>
+      <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell align="right">Id</TableCell>
-              <TableCell align="right">Nome</TableCell>
+              <TableCell align="left">Id</TableCell>
+              <TableCell align="left">Nome</TableCell>
               <TableCell align="right">Precisa da vacina</TableCell>
             </TableRow>
           </TableHead>
@@ -77,8 +83,8 @@ const Vaccines = ({ onRegister, vaccines }) => {
                   key={row.name}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                  <TableCell align="right">{row.id}</TableCell>
-                  <TableCell align="right">{row.name}</TableCell>
+                  <TableCell align="left">{row.id}</TableCell>
+                  <TableCell align="left">{row.name}</TableCell>
                   <TableCell align="right">
                     {row.vaccineId
                       ? vaccines.find(({ id }) => row.vaccineId === id).name

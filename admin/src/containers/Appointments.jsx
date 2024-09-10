@@ -25,7 +25,6 @@ const Appointments = () => {
     getAllAppointments().then((r) => {
       const { users, pets: allPets, appointments: allAppointments } = r;
       setClients(users);
-      console.log(clients)
       setAppointments(
         allAppointments.map((ex) => ({
           ...ex,

@@ -148,7 +148,6 @@ const CreateAppointment = ({
   onRegister,
   setCreating,
 }) => {
-  console.log(users)
   return (
     <div style={{ display: "flex" }}>
       <FormFields
@@ -193,9 +192,6 @@ const TableRows = ({ row, users, setEditing, onDelete, setAppointment }) => {
         key={row.id}
         sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
       >
-        <TableCell component="th" scope="row">
-          {row.id}
-        </TableCell>
         <TableCell align="right">{row.pet.name}</TableCell>
         <TableCell align="right">
           {dayjs(row.date).format("DD/MM/YYYY")}
@@ -353,7 +349,6 @@ const Appointment = ({
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell>Id</TableCell>
               <TableCell align="right">Pet</TableCell>
               <TableCell align="right">Data</TableCell>
               <TableCell align="right">Descrição</TableCell>

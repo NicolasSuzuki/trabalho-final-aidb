@@ -1,11 +1,16 @@
-const Exam = require("../models_elastic/Exam");
+const db = require("../models_elastic/db");
 // Exam and result are the same
 
 const examServices = {
   createPetResult: async ({infos, user}, res) => {
-      const exam = { ...infos, createBy: user.dataValues.id }; // petId, userId, date, imageId
-      return Exam.create(exam)
-        .then((r) =>
+      const exam = { ...infos, createBy: user.id }; // petId, userId, date, imageId
+      return db.index({
+        index: 'exams',
+        body: {
+          exam,
+          createdAt: new Date() // Adding a created timestamp if needed
+        }
+      }).then((r) =>
           res.json({
             erro: false,
             mensagem: "Exame criado com sucesso",

@@ -196,6 +196,7 @@ const CreateResult = ({
   );
 };
 const TableRows = ({ row, setEditing, onDelete, setResult }) => {
+  console.log(row)
   return (
     <TableRow
       key={row.name}
@@ -204,9 +205,9 @@ const TableRows = ({ row, setEditing, onDelete, setResult }) => {
       <TableCell component="th" scope="row">
         {row.id}
       </TableCell>
-      <TableCell align="right">{row.user.name}</TableCell>
-      <TableCell align="right">{row.pet.name}</TableCell>
-      <TableCell align="right">{row.date}</TableCell>
+      <TableCell align="right">{row.user?.name}</TableCell>
+      <TableCell align="right">{row.pet?.name}</TableCell>
+      <TableCell align="right">{row?.date}</TableCell>
       <TableCell align="right">
         {row.data && (
           <img

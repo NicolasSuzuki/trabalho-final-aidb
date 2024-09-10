@@ -38,11 +38,11 @@ const AppBarCMP = ({ onLogin, onLogout }) => {
   }, [user]);
 
   const routes = {
-    Clientes: <PeopleIcon sx={{ color: "#2B375F" }}   style={{ margin: "0 10px" }}/>,
-    Resultados: <ResultIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }}/>,
-    Consultas: <ConsultIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }}/>,
-    Vacinas: <VaccinesIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }}/>,
-    Pets: <PetsIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }}/>,
+    Clientes: <PeopleIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }} />,
+    //Resultados: <ResultIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }}/>,
+    Consultas: <ConsultIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }} />,
+    Vacinas: <VaccinesIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }} />,
+    Pets: <PetsIcon sx={{ color: "#2B375F" }} style={{ margin: "0 10px" }} />,
   };
 
   if (hasToken && !!user?.name)
@@ -68,7 +68,7 @@ const AppBarCMP = ({ onLogin, onLogout }) => {
                 textDecoration: "none",
               }}
             >
-              <img src="logo_white2x.png" alt="Logotipo" style={{ width: 125 }}/>
+              <img src="logo_white2x.png" alt="Logotipo" style={{ width: 125 }} />
             </Typography>
 
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -126,7 +126,7 @@ const AppBarCMP = ({ onLogin, onLogout }) => {
                 textDecoration: "none",
               }}
             >
-              <img src="logo_white2x.png" alt="Logotipo" style={{ width: 125 }}/>
+              <img src="logo_white2x.png" alt="Logotipo" style={{ width: 125 }} />
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {Object.entries(routes).map(([page, cmp]) => (
@@ -159,7 +159,7 @@ const AppBarCMP = ({ onLogin, onLogout }) => {
                   onClick={(e) => setAnchorElUser(e.currentTarget)}
                   sx={{ p: 0 }}
                 >
-                  <AccountIcon sx={{ color: "#000000" }} style={{width: 40, height: 40 }} />
+                  <AccountIcon sx={{ color: "#000000" }} style={{ width: 40, height: 40 }} />
                 </IconButton>
               </Tooltip>
               <Menu
@@ -196,11 +196,29 @@ const AppBarCMP = ({ onLogin, onLogout }) => {
       </AppBar>
     );
   return (
-    <AppBar style={{ width: "100%" }} position="fixed">
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          Miawor
+    <AppBar
+      style={{ width: "100%", backgroundColor: "#80C197" }}
+      position="fixed"
+    >
+      <Toolbar disableGutters>
+        <Typography
+          variant="h6"
+          noWrap
+          component="a"
+          href="/"
+          sx={{
+            mr: 2,
+            display: { xs: "none", md: "flex" },
+            fontFamily: "monospace",
+            fontWeight: 700,
+            letterSpacing: ".3rem",
+            color: "inherit",
+            textDecoration: "none",
+          }}
+        >
+          <img src="logo_white2x.png" alt="Logotipo" style={{ width: 125 }} />
         </Typography>
+
         <Button color="inherit">Login</Button>
       </Toolbar>
     </AppBar>

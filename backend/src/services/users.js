@@ -135,6 +135,50 @@ const userServices = {
         mensagem: "Usuário não cadastrado",
       };
     }
+  },
+  deleteUser: async (id) => {
+    try {
+      const result = await db.delete({
+        index: 'users',
+        id: id
+      });
+  
+      return {
+        erro: false,
+        mensagem: "Usuário deletado com sucesso",
+        result: result.body
+      };
+    } catch (error) {
+      return {
+        erro: true,
+        mensagem: "Erro ao deletar usuário",
+        detalhes: error.message
+      };
+    }
+  },
+  updateUser: async (id, updatedFields) => {
+    try {
+      const result = await db.update({
+        index: 'users',
+        id: id,
+        body: {
+          doc: updatedFields
+        }
+      });
+  
+      return {
+        erro: false,
+        mensagem: "Usuário atualizado com sucesso",
+        result: result.body
+      };
+    } catch (error) {
+      return {
+        erro: true,
+        mensagem: "Erro ao atualizar usuário",
+        detalhes: error.message
+      };
+    }
   }
+
 };
 module.exports = userServices;

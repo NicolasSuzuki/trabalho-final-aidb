@@ -20,10 +20,10 @@ const getAppointments = (appointments) => {
   const nextAppointment = nextAppointments.length
     ? nextAppointments.reduce((closest, appointment) => {
       const closestTimeDiff = Math.abs(
-        DateTime.fromISO(closest.date).minus(now)
+        DateTime.fromISO(closest.date).diff(now)
       );
       const appointmentTimeDiff = Math.abs(
-        DateTime.fromISO(appointment.date).minus(now)
+        DateTime.fromISO(appointment.date).diff(now)
       );
       return appointmentTimeDiff < closestTimeDiff ? appointment : closest;
     })
@@ -109,7 +109,6 @@ const petServices = {
         }
       }).then(resps => resps.hits.hits.filter(item => item._source.petId).map(item => ({ ...item._source, id: item._id })));
 
-      console.log(vaccines, petVaccines)
       const result = pets.map(pet => ({
         ...pet,
         ownerName: users.find(user => user.id === pet.userId)?.name,
@@ -246,7 +245,7 @@ const petServices = {
         }
       }
     });
-    const appointments = appointmentsResult.hits.hits.map(hit => hit._source).filter(appointment => appointment.petId);
+    const appointments = appointmentsResult.hits.hits.map(hit => ({...hit._source, id: hit._id })).filter(appointment => appointment.petId);
 
     // Process appointments information
     const appointmentsInfo = getAppointments(appointments);

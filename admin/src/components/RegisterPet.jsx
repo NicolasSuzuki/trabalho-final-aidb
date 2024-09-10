@@ -93,8 +93,14 @@ const RegisterPet = ({ onRegister }) => {
           >
             <Button
               variant="contained"
-              color="primary"
-              style={{ marginTop: "auto" }}
+              style={{
+                borderRadius: 5,
+                padding: "10px 25px",
+                margin: "15px 0 15px auto",
+                backgroundColor: "#80c197",
+                fontWeight: "bold",
+                marginTop: "auto"
+              }}
               onClick={() => {
                 onRegister({ ...pet, userId }).then((r) => {
                   window.location.pathname = "/clientes";
